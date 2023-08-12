@@ -58,41 +58,22 @@ model = Sequential([
     Dense(10, activation='softmax')
 ])
 
-model.compile(optimizer='adam',
+model.compile(optimizer='Nadam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy']
              )
 
 early_stopping = EarlyStopping(patience=5, restore_best_weights=True)
 
-model.fit(train_x, train_y, epochs=100, batch_size=128, validation_split=0.1, callbacks=[early_stopping])
+model.fit(train_x, train_y, epochs=100, batch_size=256, validation_split=0.1,
+          callbacks=[early_stopping])
 
 loss, accuracy = model.evaluate(test_x, test_y)
+print(accuracy)
 
-# 가장 높은 정확도의 가중치 추출
-best_weights = model.get_weights()
-
-# 가장 높은 정확도의 가중치를 모델에 설정
-model.set_weights(best_weights)
-loss, accuracy = model.evaluate(test_x, test_y)
-print("Test accuracy:", accuracy)
-print("Best weights shape : ", len(best_weights))
-print("Best weights : ", best_weights)
-
-print(best_weights[0].shape)
-print(best_weights[1].shape)
-print(best_weights[2].shape)
-print(best_weights[3].shape)
-print(best_weights[4].shape)
-print(best_weights[5].shape)
-print(best_weights[6].shape)
-print(best_weights[7].shape)
-
-np.savetxt('weights[0].csv', best_weights[0])
-np.savetxt('weights[1].csv', best_weights[1])
-np.savetxt('weights[2].csv', best_weights[2])
-np.savetxt('weights[3].csv', best_weights[3])
-np.savetxt('weights[4].csv', best_weights[4])
-np.savetxt('weights[5].csv', best_weights[5])
-np.savetxt('weights[6].csv', best_weights[6])
-np.savetxt('weights[7].csv', best_weights[7])
+# 가중치를 CSV 파일로 저장하는 부분
+for idx, layer in enumerate(model.layers):
+    if isinstance(layer, Dense):
+        weights = layer.get_weights()
+        for i, w in enumerate(weights):
+            np.savetxt(f'weights_layer{idx}_weight{i}.csv', w, delimiter=',')
